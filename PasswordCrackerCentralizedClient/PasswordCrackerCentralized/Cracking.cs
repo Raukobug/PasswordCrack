@@ -41,17 +41,22 @@ namespace PasswordCrackerCentralized
             }
                 sw.WriteLine("-1");
             sw.Flush();
+
             using (FileStream fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
             using (StreamReader dictionary = new StreamReader(fs))
             {
                 while (!dictionary.EndOfStream)
                 {
                     String dictionaryEntry = dictionary.ReadLine();
+                    sw.WriteLine(dictionaryEntry);
                     //IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
                     //result.AddRange(partialResult);
                 }
             }
+            sw.Flush();
             stopwatch.Stop();
+            sw.Close();
+            ns.Close();
             Console.WriteLine(string.Join(", ", result));
             Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
         }

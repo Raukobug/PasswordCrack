@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Net;
+using System.Net.Sockets;
 using PasswordCrackerCentralized.model;
 using PasswordCrackerCentralized.util;
 using System;
@@ -28,24 +29,44 @@ namespace PasswordCrackerCentralized
         /// </summary>
         public void RunCracking()
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
-            List<UserInfo> userInfos =
-                PasswordFileHandler.ReadPasswordFile("passwords.txt");
+            bool userlist = true;
+            var serverSocket = new TcpListener(IPAddress.Any, 6789);
+            serverSocket.Start();
+            Socket connectionSocket = serverSocket.AcceptSocket();
+            List<UserInfo> userInfos = new List<UserInfo>();
             List<UserInfoClearText> result = new List<UserInfoClearText>();
-            using (FileStream fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
-            using (StreamReader dictionary = new StreamReader(fs))
+            using (Stream ns = new NetworkStream(connectionSocket))
+            using (var sr = new StreamReader(ns))
             {
-                while (!dictionary.EndOfStream)
+                while (!sr.EndOfStream)
                 {
-                    String dictionaryEntry = dictionary.ReadLine();
-                    IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
-                    result.AddRange(partialResult);
+                    String dictionaryEntry = sr.ReadLine();
+                    if (dictionaryEntry == "-1")
+                    {
+                        userlist = false;
+                    }
+                    if (userlist == false)
+                    {
+                        if (dictionaryEntry != "-1")
+                        {
+                        Console.WriteLine(dictionaryEntry);
+                        //IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
+                        //result.AddRange(partialResult);
+                        }
+                    }
+                    else
+                    {
+                        if (dictionaryEntry != null)
+                        {
+                            String[] parts = dictionaryEntry.Split(":".ToCharArray());
+                            UserInfo userInfo = new UserInfo(parts[0], parts[1]);
+                            userInfos.Add(userInfo);
+                        }
+                    }
+
                 }
             }
-            stopwatch.Stop();
             Console.WriteLine(string.Join(", ", result));
-            Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
         }
 
         /// <summary>
