@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net.Sockets;
 using PasswordCrackerCentralized.model;
 using PasswordCrackerCentralized.util;
 using System;
@@ -28,19 +29,26 @@ namespace PasswordCrackerCentralized
         /// </summary>
         public void RunCracking()
         {
+            var clientSocket = new TcpClient("localhost", 6789);
+            Stream ns = clientSocket.GetStream();
+            var sw = new StreamWriter(ns);
             Stopwatch stopwatch = Stopwatch.StartNew();
-
-            List<UserInfo> userInfos =
-                PasswordFileHandler.ReadPasswordFile("passwords.txt");
+            List<UserInfo> userInfos = PasswordFileHandler.ReadPasswordFile("passwords.txt");
             List<UserInfoClearText> result = new List<UserInfoClearText>();
+            foreach (var ui in userInfos)
+            {
+                sw.WriteLine(ui);
+            }
+                sw.WriteLine("-1");
+            sw.Flush();
             using (FileStream fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
             using (StreamReader dictionary = new StreamReader(fs))
             {
                 while (!dictionary.EndOfStream)
                 {
                     String dictionaryEntry = dictionary.ReadLine();
-                    IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
-                    result.AddRange(partialResult);
+                    //IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
+                    //result.AddRange(partialResult);
                 }
             }
             stopwatch.Stop();
