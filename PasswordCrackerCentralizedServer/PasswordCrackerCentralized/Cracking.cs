@@ -49,9 +49,9 @@ namespace PasswordCrackerCentralized
                     {
                         if (dictionaryEntry != "-1")
                         {
-                        Console.WriteLine(dictionaryEntry);
-                        //IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
-                        //result.AddRange(partialResult);
+                        //Console.WriteLine(dictionaryEntry);
+                        IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
+                        result.AddRange(partialResult);
                         }
                     }
                     else
@@ -66,6 +66,7 @@ namespace PasswordCrackerCentralized
 
                 }
             }
+
             Console.WriteLine(string.Join(", ", result));
         }
 
