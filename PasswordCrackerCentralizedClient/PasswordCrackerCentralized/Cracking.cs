@@ -1,5 +1,6 @@
-﻿using System.Diagnostics;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using PasswordCrackerCentralized.model;
 using PasswordCrackerCentralized.util;
 using System;
@@ -16,10 +17,22 @@ namespace PasswordCrackerCentralized
         /// Must be exactly the same algorithm that was used to encrypt the passwords in the password file
         /// </summary>
         private readonly HashAlgorithm _messageDigest;
-
+        Queue<string> lib = new Queue<string>();
         public Cracking()
         {
             _messageDigest = new SHA1CryptoServiceProvider();
+            using (FileStream fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
+            using (StreamReader dictionary = new StreamReader(fs))
+            {
+                while (!dictionary.EndOfStream)
+                {
+
+                    String dictionaryEntry = dictionary.ReadLine();
+                    lib.Enqueue(dictionaryEntry);
+                    //IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
+                    //result.AddRange(partialResult);
+                }
+            }
             //_messageDigest = new MD5CryptoServiceProvider();
             // seems to be same speed
         }
@@ -27,40 +40,59 @@ namespace PasswordCrackerCentralized
         /// <summary>
         /// Runs the password cracking algorithm
         /// </summary>
-        public void RunCracking()
+        public void RunCracking(List<TcpClient> tcpClients)
         {
-            var clientSocket = new TcpClient("localhost", 6789);
+            List<Task> tasks = new List<Task>();
+            
+            foreach (var tcpClient in tcpClients)
+            {
+                TcpClient client = tcpClient;
+                tasks.Add(Task.Run(() => Send(client)));
+            }
+            Task.WaitAll(tasks.ToArray());
+        }
+
+        public void Send(TcpClient tcpClient)
+        {
+            TcpClient clientSocket = tcpClient;
             Stream ns = clientSocket.GetStream();
             var sw = new StreamWriter(ns);
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            var sr = new StreamReader(ns);
             List<UserInfo> userInfos = PasswordFileHandler.ReadPasswordFile("passwords.txt");
             List<UserInfoClearText> result = new List<UserInfoClearText>();
             foreach (var ui in userInfos)
             {
                 sw.WriteLine(ui);
             }
-                sw.WriteLine("-1");
+            sw.WriteLine("-1");
             sw.Flush();
 
-            using (FileStream fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
-            using (StreamReader dictionary = new StreamReader(fs))
+
+            while (lib.Count > 0)
             {
-                while (!dictionary.EndOfStream)
+                lock (lib)
                 {
-                    String dictionaryEntry = dictionary.ReadLine();
-                    sw.WriteLine(dictionaryEntry);
-                    //IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
-                    //result.AddRange(partialResult);
+                    for (int j = 0; j < 1000; j++)
+                      {
+                        if (lib.Count > 0)
+                        {
+                            sw.WriteLine(lib.Dequeue());
+                        }
+                    }
+                    sw.Flush();
+                    sw.WriteLine("-2");
+                    sw.Flush();
+                    Console.WriteLine(sr.ReadLine());
+                    Monitor.PulseAll(lib);
                 }
+
             }
-            sw.Flush();
-            stopwatch.Stop();
+
             sw.Close();
             ns.Close();
             Console.WriteLine(string.Join(", ", result));
-            Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
-        }
 
+        }
         /// <summary>
         /// Generates a lot of variations, encrypts each of the and compares it to all entries in the password file
         /// </summary>

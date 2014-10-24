@@ -1,4 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PasswordCrackerCentralized
 {
@@ -6,8 +11,28 @@ namespace PasswordCrackerCentralized
     {
         static void Main()
         {
+            List<TcpClient> tcpClients = new List<TcpClient>();
+            Console.Title = "Jeg er fucking Client";
+            bool startup = true;
+            while (startup) { 
+            string call = Console.ReadLine();
+                if (call == "start")
+                {
+                    startup = false;
+                }
+                else 
+                { 
+                string[] split = call.Split(':');
+                 tcpClients.Add(new TcpClient(split[0], Convert.ToInt32(split[1])));
+                }
+            }
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            List<Task> tasks = new List<Task>();
             Cracking cracker = new Cracking();
-            Parallel.Invoke(cracker.RunCracking);
+            tasks.Add(Task.Run(() => cracker.RunCracking(tcpClients)));
+            Task.WaitAll(tasks.ToArray());
+            stopwatch.Stop();
+            Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
         }
     }
 }

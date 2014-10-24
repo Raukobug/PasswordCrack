@@ -35,39 +35,59 @@ namespace PasswordCrackerCentralized
             Socket connectionSocket = serverSocket.AcceptSocket();
             List<UserInfo> userInfos = new List<UserInfo>();
             List<UserInfoClearText> result = new List<UserInfoClearText>();
-            using (Stream ns = new NetworkStream(connectionSocket))
-            using (var sr = new StreamReader(ns))
-            {
-                while (!sr.EndOfStream)
-                {
-                    String dictionaryEntry = sr.ReadLine();
-                    if (dictionaryEntry == "-1")
-                    {
-                        userlist = false;
-                    }
-                    if (userlist == false)
-                    {
-                        if (dictionaryEntry != "-1")
-                        {
-                        //Console.WriteLine(dictionaryEntry);
-                        IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
-                        result.AddRange(partialResult);
-                        }
-                    }
-                    else
-                    {
-                        if (dictionaryEntry != null)
-                        {
-                            String[] parts = dictionaryEntry.Split(":".ToCharArray());
-                            UserInfo userInfo = new UserInfo(parts[0], parts[1]);
-                            userInfos.Add(userInfo);
-                        }
-                    }
+            Queue<string> queue = new Queue<string>();
+            bool getting = true;
 
+            using (Stream ns = new NetworkStream(connectionSocket))
+            {
+                var sw = new StreamWriter(ns);
+                using (var sr = new StreamReader(ns))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        String dictionaryEntry = sr.ReadLine();
+                        if (dictionaryEntry == "-1")
+                        {
+                            userlist = false;
+                        }
+                        if (userlist == false && dictionaryEntry != "-1")
+                        {
+                                if (dictionaryEntry == "-2")
+                                {
+                                    getting = false;
+                                    Console.WriteLine("Done Reciving.");
+                                }
+                                else
+                                {
+                                queue.Enqueue(dictionaryEntry); 
+                                }
+                        }
+                        else
+                        {
+                            if (dictionaryEntry != null && userlist)
+                            {
+                                    String[] parts = dictionaryEntry.Split(":".ToCharArray());
+                                    UserInfo userInfo = new UserInfo(parts[0], parts[1]);
+                                    userInfos.Add(userInfo);  
+                            }
+                        }
+                        while (!getting)
+                        {
+                            IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(queue.Dequeue(),
+                                userInfos);
+                            result.AddRange(partialResult);
+                            if (queue.Count == 0)
+                            {
+                                getting = true;
+                                sw.WriteLine("Done");
+                                sw.Flush();
+                            }
+                        }
+                    }
                 }
             }
-
             Console.WriteLine(string.Join(", ", result));
+            Console.ReadKey();
         }
 
         /// <summary>
