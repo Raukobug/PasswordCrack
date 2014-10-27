@@ -61,6 +61,7 @@ namespace PasswordCrackerCentralized
             var sr = new StreamReader(ns);
             List<UserInfo> userInfos = PasswordFileHandler.ReadPasswordFile("passwords.txt");
             List<UserInfoClearText> result = new List<UserInfoClearText>();
+            List<string> myResult = new List<string>();
             foreach (var ui in userInfos)
             {
                 sw.WriteLine(ui);
@@ -72,7 +73,7 @@ namespace PasswordCrackerCentralized
             int numb = 1000;
             while (lib.Count > 0)
             {
-                //var stop = new Stopwatch();
+                var stop = new Stopwatch();
                 if (rdy)
                 {
                     //Console.WriteLine(numb);
@@ -85,7 +86,7 @@ namespace PasswordCrackerCentralized
                     }
                     rdy = false;
                     sw.Flush();
-                    //stop.Start();
+                    stop.Start();
                     sw.WriteLine("-2");
                     sw.Flush();
                 }
@@ -93,26 +94,34 @@ namespace PasswordCrackerCentralized
                 if (msg == "Done")
                 {
                     rdy = true;
-                    //stop.Stop();
+                    stop.Stop();
                     //Console.WriteLine(stop.Elapsed);
-                    //if (stop.Elapsed.Seconds >= 1 && numb != 100)
-                    //{
-                    //    numb = numb - 100;
-                    //}
-                    //else
-                    //{
-                    //    numb = numb + 100;
-                    //}
+                    if (stop.Elapsed.Seconds >= 1 && numb != 100)
+                    {
+                        numb = numb - 100;
+                    }
+                    else
+                    {
+                        numb = numb + 100;
+                    }
                 }
                 if (msg != "Done")
                 {
+                    string[] splited = msg.Split(':');
+                    myResult.Add(splited[0]);
                     Console.WriteLine(msg);
                 }
 
             }
+            foreach (var userInfo in userInfos)
+            {
+                if (!myResult.Contains(userInfo.Username))
+                {
+                    Console.WriteLine("Password for {0} was not found!", userInfo.Username);
+                }
+            }
             sw.Close();
             ns.Close();
-            Console.WriteLine(string.Join(", ", result));
         }
         /// <summary>
         /// Generates a lot of variations, encrypts each of the and compares it to all entries in the password file

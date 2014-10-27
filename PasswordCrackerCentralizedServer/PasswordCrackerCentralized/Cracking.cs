@@ -19,7 +19,7 @@ namespace PasswordCrackerCentralized
         /// </summary>
         private readonly HashAlgorithm _messageDigest;
 
-        private string newuserpass;
+        private string _newuserpass;
 
         public Cracking()
         {
@@ -84,11 +84,11 @@ namespace PasswordCrackerCentralized
                                 IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(queue.Dequeue(),
                                     userInfos);
                                 result.AddRange(partialResult);
-                            if (newuserpass != null)
+                            if (_newuserpass != null)
                             {
-                                sw.WriteLine(newuserpass);
+                                sw.WriteLine(_newuserpass);
                                 sw.Flush();
-                                newuserpass = null;
+                                _newuserpass = null;
                             }
 
                                 if (queue.Count == 0)
@@ -182,7 +182,7 @@ namespace PasswordCrackerCentralized
                 {
                     results.Add(new UserInfoClearText(userInfo.Username, possiblePassword));
                     Console.WriteLine(userInfo.Username + " " + possiblePassword);
-                    newuserpass = userInfo.Username + ": " + possiblePassword;
+                    _newuserpass = userInfo.Username + ": " + possiblePassword;
                 }
             }
             return results;
