@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Diagnostics;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using PasswordCrackerCentralized.model;
@@ -21,7 +22,7 @@ namespace PasswordCrackerCentralized
         public Cracking()
         {
             _messageDigest = new SHA1CryptoServiceProvider();
-            using (FileStream fs = new FileStream("webster-dictionary-reduced.txt", FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
             using (StreamReader dictionary = new StreamReader(fs))
             {
                 while (!dictionary.EndOfStream)
@@ -43,7 +44,7 @@ namespace PasswordCrackerCentralized
         public void RunCracking(List<TcpClient> tcpClients)
         {
             List<Task> tasks = new List<Task>();
-            
+
             foreach (var tcpClient in tcpClients)
             {
                 TcpClient client = tcpClient;
@@ -68,11 +69,14 @@ namespace PasswordCrackerCentralized
             sw.Flush();
 
             bool rdy = true;
+            int numb = 1000;
             while (lib.Count > 0)
             {
+                var stop = new Stopwatch();
                 if (rdy)
                 {
-                    for (int j = 0; j < 100; j++)
+                    Console.WriteLine(numb);
+                    for (int j = 0; j < numb; j++)
                     {
                         if (lib.Count > 0)
                         {
@@ -81,24 +85,34 @@ namespace PasswordCrackerCentralized
                     }
                     rdy = false;
                     sw.Flush();
+                    stop.Start();
                     sw.WriteLine("-2");
-                    sw.Flush();   
+                    sw.Flush();
                 }
                 string msg = sr.ReadLine();
                 if (msg == "Done")
                 {
                     rdy = true;
+                    stop.Stop();
+                    //Console.WriteLine(stop.Elapsed);
+                    if (stop.Elapsed.Seconds >= 1 && numb != 100)
+                    {
+                        numb = numb - 100;
+                    }
+                    else
+                    {
+                        numb = numb + 100;
+                    }
                 }
                 if (msg != "Done")
                 {
-                    Console.WriteLine(msg); 
+                    Console.WriteLine(msg);
                 }
 
             }
             sw.Close();
             ns.Close();
             Console.WriteLine(string.Join(", ", result));
-
         }
         /// <summary>
         /// Generates a lot of variations, encrypts each of the and compares it to all entries in the password file

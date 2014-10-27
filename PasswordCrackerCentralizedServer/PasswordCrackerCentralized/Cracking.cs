@@ -32,7 +32,7 @@ namespace PasswordCrackerCentralized
         {
             int count = 0;
             bool userlist = true;
-            var serverSocket = new TcpListener(IPAddress.Any, 6789);
+            var serverSocket = new TcpListener(IPAddress.Any, 65080);
             serverSocket.Start();
             Socket connectionSocket = serverSocket.AcceptSocket();
             List<UserInfo> userInfos = new List<UserInfo>();
@@ -40,8 +40,8 @@ namespace PasswordCrackerCentralized
             Queue<string> queue = new Queue<string>();
             bool getting = true;
 
-            Stream ns = new NetworkStream(connectionSocket);
-            
+            using (Stream ns = new NetworkStream(connectionSocket))
+            {
                 var sw = new StreamWriter(ns);
                 using (var sr = new StreamReader(ns))
                 {
@@ -88,10 +88,10 @@ namespace PasswordCrackerCentralized
                         }
                     }
                 }
+            }
             Console.WriteLine(count);
             Console.WriteLine(string.Join(", ", result));
             Console.ReadKey();
-            ns.Close();
         }
 
         /// <summary>
