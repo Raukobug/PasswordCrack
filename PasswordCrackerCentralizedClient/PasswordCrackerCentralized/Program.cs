@@ -22,6 +22,22 @@ namespace PasswordCrackerCentralized
                 }
                 else 
                 {
+                    if (call == "1")
+                    {
+                        call = "10.154.1.207:65080";
+                    }
+                    if (call == "2")
+                    {
+                        call = "10.154.1.162:65080";    
+                    }
+                    if (call == "3")
+                    {
+                        call = "10.154.2.61:65080"; 
+                    }
+                    if (call == "4")
+                    {
+                        call = "localhost:65080";
+                    }
                     try
                     {
                         string[] split = call.Split(':');

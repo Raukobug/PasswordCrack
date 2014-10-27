@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using PasswordCrackerCentralized.model;
 using PasswordCrackerCentralized.util;
 using System;
@@ -39,6 +40,7 @@ namespace PasswordCrackerCentralized
             List<UserInfoClearText> result = new List<UserInfoClearText>();
             Queue<string> queue = new Queue<string>();
             bool getting = true;
+            var myTasks = new List<Task>();
 
             using (Stream ns = new NetworkStream(connectionSocket))
             {
@@ -75,16 +77,20 @@ namespace PasswordCrackerCentralized
                         }
                         while (!getting)
                         {
-                            IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(queue.Dequeue(),
-                                userInfos);
-                            result.AddRange(partialResult);
-                            if (queue.Count == 0)
+                            myTasks.Add(Task.Run(() =>
                             {
-                                count++;
-                                getting = true;
-                                sw.WriteLine("Done");
-                                sw.Flush();
-                            }
+                                IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(queue.Dequeue(),
+                                    userInfos);
+                                result.AddRange(partialResult);
+                                if (queue.Count == 0)
+                                {
+                                    count++;
+                                    getting = true;
+                                    sw.WriteLine("Done");
+                                    sw.Flush();
+                                }
+                            }));
+                            Task.WaitAll(myTasks.ToArray());
                         }
                     }
                 }

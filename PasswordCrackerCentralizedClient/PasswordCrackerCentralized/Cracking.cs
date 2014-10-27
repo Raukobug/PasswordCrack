@@ -72,10 +72,10 @@ namespace PasswordCrackerCentralized
             int numb = 1000;
             while (lib.Count > 0)
             {
-                var stop = new Stopwatch();
+                //var stop = new Stopwatch();
                 if (rdy)
                 {
-                    Console.WriteLine(numb);
+                    //Console.WriteLine(numb);
                     for (int j = 0; j < numb; j++)
                     {
                         if (lib.Count > 0)
@@ -85,7 +85,7 @@ namespace PasswordCrackerCentralized
                     }
                     rdy = false;
                     sw.Flush();
-                    stop.Start();
+                    //stop.Start();
                     sw.WriteLine("-2");
                     sw.Flush();
                 }
@@ -93,16 +93,16 @@ namespace PasswordCrackerCentralized
                 if (msg == "Done")
                 {
                     rdy = true;
-                    stop.Stop();
+                    //stop.Stop();
                     //Console.WriteLine(stop.Elapsed);
-                    if (stop.Elapsed.Seconds >= 1 && numb != 100)
-                    {
-                        numb = numb - 100;
-                    }
-                    else
-                    {
-                        numb = numb + 100;
-                    }
+                    //if (stop.Elapsed.Seconds >= 1 && numb != 100)
+                    //{
+                    //    numb = numb - 100;
+                    //}
+                    //else
+                    //{
+                    //    numb = numb + 100;
+                    //}
                 }
                 if (msg != "Done")
                 {
