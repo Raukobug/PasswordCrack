@@ -21,7 +21,7 @@ namespace PasswordCrackerCentralized
         public Cracking()
         {
             _messageDigest = new SHA1CryptoServiceProvider();
-            using (FileStream fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new FileStream("webster-dictionary-reduced.txt", FileMode.Open, FileAccess.Read))
             using (StreamReader dictionary = new StreamReader(fs))
             {
                 while (!dictionary.EndOfStream)
@@ -67,27 +67,34 @@ namespace PasswordCrackerCentralized
             sw.WriteLine("-1");
             sw.Flush();
 
-
+            bool rdy = true;
             while (lib.Count > 0)
             {
-                lock (lib)
+                if (rdy)
                 {
-                    for (int j = 0; j < 1000; j++)
-                      {
+                    for (int j = 0; j < 100; j++)
+                    {
                         if (lib.Count > 0)
                         {
                             sw.WriteLine(lib.Dequeue());
                         }
                     }
+                    rdy = false;
                     sw.Flush();
                     sw.WriteLine("-2");
-                    sw.Flush();
-                    Console.WriteLine(sr.ReadLine());
-                    Monitor.PulseAll(lib);
+                    sw.Flush();   
+                }
+                string msg = sr.ReadLine();
+                if (msg == "Done")
+                {
+                    rdy = true;
+                }
+                if (msg != "Done")
+                {
+                    Console.WriteLine(msg); 
                 }
 
             }
-
             sw.Close();
             ns.Close();
             Console.WriteLine(string.Join(", ", result));

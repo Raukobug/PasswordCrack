@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using PasswordCrackerCentralized.model;
 using PasswordCrackerCentralized.util;
@@ -29,6 +30,7 @@ namespace PasswordCrackerCentralized
         /// </summary>
         public void RunCracking()
         {
+            int count = 0;
             bool userlist = true;
             var serverSocket = new TcpListener(IPAddress.Any, 6789);
             serverSocket.Start();
@@ -38,8 +40,8 @@ namespace PasswordCrackerCentralized
             Queue<string> queue = new Queue<string>();
             bool getting = true;
 
-            using (Stream ns = new NetworkStream(connectionSocket))
-            {
+            Stream ns = new NetworkStream(connectionSocket);
+            
                 var sw = new StreamWriter(ns);
                 using (var sr = new StreamReader(ns))
                 {
@@ -68,7 +70,7 @@ namespace PasswordCrackerCentralized
                             {
                                     String[] parts = dictionaryEntry.Split(":".ToCharArray());
                                     UserInfo userInfo = new UserInfo(parts[0], parts[1]);
-                                    userInfos.Add(userInfo);  
+                                    userInfos.Add(userInfo);
                             }
                         }
                         while (!getting)
@@ -78,6 +80,7 @@ namespace PasswordCrackerCentralized
                             result.AddRange(partialResult);
                             if (queue.Count == 0)
                             {
+                                count++;
                                 getting = true;
                                 sw.WriteLine("Done");
                                 sw.Flush();
@@ -85,9 +88,10 @@ namespace PasswordCrackerCentralized
                         }
                     }
                 }
-            }
+            Console.WriteLine(count);
             Console.WriteLine(string.Join(", ", result));
             Console.ReadKey();
+            ns.Close();
         }
 
         /// <summary>

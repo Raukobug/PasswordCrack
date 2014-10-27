@@ -21,9 +21,17 @@ namespace PasswordCrackerCentralized
                     startup = false;
                 }
                 else 
-                { 
-                string[] split = call.Split(':');
-                 tcpClients.Add(new TcpClient(split[0], Convert.ToInt32(split[1])));
+                {
+                    try
+                    {
+                        string[] split = call.Split(':');
+                        tcpClients.Add(new TcpClient(split[0], Convert.ToInt32(split[1])));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Could not find server.");
+                    }
+
                 }
             }
             Stopwatch stopwatch = Stopwatch.StartNew();
