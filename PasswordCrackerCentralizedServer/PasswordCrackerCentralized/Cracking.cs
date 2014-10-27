@@ -19,6 +19,8 @@ namespace PasswordCrackerCentralized
         /// </summary>
         private readonly HashAlgorithm _messageDigest;
 
+        private string newuserpass;
+
         public Cracking()
         {
             _messageDigest = new SHA1CryptoServiceProvider();
@@ -77,11 +79,18 @@ namespace PasswordCrackerCentralized
                         }
                         while (!getting)
                         {
-                            myTasks.Add(Task.Run(() =>
-                            {
+                            //myTasks.Add(Task.Run(() =>
+                           // {
                                 IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(queue.Dequeue(),
                                     userInfos);
                                 result.AddRange(partialResult);
+                            if (newuserpass != null)
+                            {
+                                sw.WriteLine(newuserpass);
+                                sw.Flush();
+                                newuserpass = null;
+                            }
+
                                 if (queue.Count == 0)
                                 {
                                     count++;
@@ -89,8 +98,8 @@ namespace PasswordCrackerCentralized
                                     sw.WriteLine("Done");
                                     sw.Flush();
                                 }
-                            }));
-                            Task.WaitAll(myTasks.ToArray());
+                          //  }));
+                          //  Task.WaitAll(myTasks.ToArray());
                         }
                     }
                 }
@@ -173,6 +182,7 @@ namespace PasswordCrackerCentralized
                 {
                     results.Add(new UserInfoClearText(userInfo.Username, possiblePassword));
                     Console.WriteLine(userInfo.Username + " " + possiblePassword);
+                    newuserpass = userInfo.Username + ": " + possiblePassword;
                 }
             }
             return results;
