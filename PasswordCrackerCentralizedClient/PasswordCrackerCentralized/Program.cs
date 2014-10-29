@@ -23,6 +23,8 @@ namespace PasswordCrackerCentralized
                 {
                     startup = false;
                     logging.WriteEntry("Cracking begun", EventLogEntryType.Information, 3);
+                    Console.Clear();
+                    Console.SetCursorPosition(0,0);
                 }
                 else
                 {

@@ -11,7 +11,7 @@ namespace PasswordCrackerCentralized
 {
     public class Cracking
     {
-        readonly Queue<string> _lib = new Queue<string>();
+        public readonly Queue<string> Lib = new Queue<string>();
         public Cracking()
         {
             using (var fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
@@ -21,7 +21,7 @@ namespace PasswordCrackerCentralized
                 {
 
                     String dictionaryEntry = dictionary.ReadLine();
-                    _lib.Enqueue(dictionaryEntry);
+                    Lib.Enqueue(dictionaryEntry);
                     //IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
                     //result.AddRange(partialResult);
                 }
@@ -63,7 +63,7 @@ namespace PasswordCrackerCentralized
 
             bool rdy = true;
             int numb = 1000;
-            while (_lib.Count > 0)
+            while (Lib.Count > 0)
             {
                 var stop = new Stopwatch();
                 if (rdy)
@@ -71,9 +71,9 @@ namespace PasswordCrackerCentralized
                     //Console.WriteLine(numb);
                     for (int j = 0; j < numb; j++)
                     {
-                        if (_lib.Count > 0)
+                        if (Lib.Count > 0)
                         {
-                            sw.WriteLine(_lib.Dequeue());
+                            sw.WriteLine(Lib.Dequeue());
                         }
                     }
                     rdy = false;
