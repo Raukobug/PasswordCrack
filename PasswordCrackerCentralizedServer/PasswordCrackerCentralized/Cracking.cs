@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using PasswordCrackerCentralized.model;
 using PasswordCrackerCentralized.util;
 using System;
@@ -38,11 +36,10 @@ namespace PasswordCrackerCentralized
             var serverSocket = new TcpListener(IPAddress.Any, 65080);
             serverSocket.Start();
             Socket connectionSocket = serverSocket.AcceptSocket();
-            List<UserInfo> userInfos = new List<UserInfo>();
-            List<UserInfoClearText> result = new List<UserInfoClearText>();
-            Queue<string> queue = new Queue<string>();
+            var userInfos = new List<UserInfo>();
+            var result = new List<UserInfoClearText>();
+            var queue = new Queue<string>();
             bool getting = true;
-            var myTasks = new List<Task>();
 
             using (Stream ns = new NetworkStream(connectionSocket))
             {
@@ -58,32 +55,32 @@ namespace PasswordCrackerCentralized
                         }
                         if (userlist == false && dictionaryEntry != "-1")
                         {
-                                if (dictionaryEntry == "-2")
-                                {
-                                    getting = false;
-                                    Console.WriteLine("Done Reciving.");
-                                }
-                                else
-                                {
-                                queue.Enqueue(dictionaryEntry); 
-                                }
+                            if (dictionaryEntry == "-2")
+                            {
+                                getting = false;
+                                Console.WriteLine("Done Reciving.");
+                            }
+                            else
+                            {
+                                queue.Enqueue(dictionaryEntry);
+                            }
                         }
                         else
                         {
                             if (dictionaryEntry != null && userlist)
                             {
-                                    String[] parts = dictionaryEntry.Split(":".ToCharArray());
-                                    UserInfo userInfo = new UserInfo(parts[0], parts[1]);
-                                    userInfos.Add(userInfo);
+                                String[] parts = dictionaryEntry.Split(":".ToCharArray());
+                                var userInfo = new UserInfo(parts[0], parts[1]);
+                                userInfos.Add(userInfo);
                             }
                         }
                         while (!getting)
                         {
                             //myTasks.Add(Task.Run(() =>
-                           // {
-                                IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(queue.Dequeue(),
-                                    userInfos);
-                                result.AddRange(partialResult);
+                            // {
+                            IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(queue.Dequeue(),
+                                userInfos);
+                            result.AddRange(partialResult);
                             if (_newuserpass != null)
                             {
                                 sw.WriteLine(_newuserpass);
@@ -91,22 +88,21 @@ namespace PasswordCrackerCentralized
                                 _newuserpass = null;
                             }
 
-                                if (queue.Count == 0)
-                                {
-                                    count++;
-                                    getting = true;
-                                    sw.WriteLine("Done");
-                                    sw.Flush();
-                                }
-                          //  }));
-                          //  Task.WaitAll(myTasks.ToArray());
+                            if (queue.Count == 0)
+                            {
+                                count++;
+                                getting = true;
+                                sw.WriteLine("Done");
+                                sw.Flush();
+                            }
+                            //  }));
+                            //  Task.WaitAll(myTasks.ToArray());
                         }
                     }
                 }
             }
             Console.WriteLine(count);
             Console.WriteLine(string.Join(", ", result));
-            Console.ReadKey();
         }
 
         /// <summary>
@@ -117,7 +113,7 @@ namespace PasswordCrackerCentralized
         /// <returns>A list of (username, readable password) pairs. The list might be empty</returns>
         private IEnumerable<UserInfoClearText> CheckWordWithVariations(String dictionaryEntry, List<UserInfo> userInfos)
         {
-            List<UserInfoClearText> result = new List<UserInfoClearText>();
+            var result = new List<UserInfoClearText>();
 
             String possiblePassword = dictionaryEntry;
             IEnumerable<UserInfoClearText> partialResult = CheckSingleWord(userInfos, possiblePassword);
@@ -175,7 +171,7 @@ namespace PasswordCrackerCentralized
             byte[] encryptedPassword = _messageDigest.ComputeHash(passwordAsBytes);
             //string encryptedPasswordBase64 = System.Convert.ToBase64String(encryptedPassword);
 
-            List<UserInfoClearText> results = new List<UserInfoClearText>();
+            var results = new List<UserInfoClearText>();
             foreach (UserInfo userInfo in userInfos)
             {
                 if (CompareBytes(userInfo.EntryptedPassword, encryptedPassword))

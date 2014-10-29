@@ -7,8 +7,8 @@ namespace PasswordCrackerCentralized
     {
         static void Main()
         {
-            Console.Title = "6789";
-            Cracking cracker = new Cracking();
+            Console.Title = "Server";
+            var cracker = new Cracking();
             Parallel.Invoke(cracker.RunCracking);
         }
     }

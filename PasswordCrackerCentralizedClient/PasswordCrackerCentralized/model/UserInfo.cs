@@ -8,7 +8,6 @@ namespace PasswordCrackerCentralized.model
     /// The encrypted password is a byte array (cannot be written to the password file)
     /// This must be Base64 encoded (converted to a string) before written to the file 
     /// </summary>
-    [Serializable]
     class UserInfo
     {
         public String Username { get; set; }
