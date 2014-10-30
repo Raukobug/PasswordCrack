@@ -49,19 +49,23 @@ namespace PasswordCrackerCentralized
                     while (!sr.EndOfStream)
                     {
                         String dictionaryEntry = sr.ReadLine();
+                        //Hvis besked er -1 skal den sætte userlist til falsk så programmet ved at den er færdig med at modtage bruger listen.
                         if (dictionaryEntry == "-1")
                         {
                             userlist = false;
                         }
                         if (userlist == false && dictionaryEntry != "-1")
                         {
+                            //Hvis beskeden er -2 skal den sætte getting til falsk så programmet ved at den er færdig med at modtage ord fra ordbogen.
                             if (dictionaryEntry == "-2")
                             {
                                 getting = false;
+                                //Printer til console så man faktisk kan se der sker noget.
                                 Console.WriteLine("Done Reciving.");
                             }
                             else
                             {
+                                //Hvis den ikke er færdig med at modtage fra ordbogen skal den smide det ind i køen
                                 queue.Enqueue(dictionaryEntry);
                             }
                         }
@@ -69,6 +73,7 @@ namespace PasswordCrackerCentralized
                         {
                             if (dictionaryEntry != null && userlist)
                             {
+                                //Her smider den bruger listen ind i en liste til sener brug.
                                 String[] parts = dictionaryEntry.Split(":".ToCharArray());
                                 var userInfo = new UserInfo(parts[0], parts[1]);
                                 userInfos.Add(userInfo);
@@ -78,9 +83,11 @@ namespace PasswordCrackerCentralized
                         {
                             //myTasks.Add(Task.Run(() =>
                             // {
+                            // Her går den i gangmed selve dekrypteringen
                             IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(queue.Dequeue(),
                                 userInfos);
                             result.AddRange(partialResult);
+                            //Hvis den får svar tilbage skal den skrive det tilbage til clienten.
                             if (_newuserpass != null)
                             {
                                 sw.WriteLine(_newuserpass);
@@ -88,6 +95,7 @@ namespace PasswordCrackerCentralized
                                 _newuserpass = null;
                             }
 
+                            //Hvis køen er tom giver den besked til clienten så den kan få en ny omgang ord.
                             if (queue.Count == 0)
                             {
                                 count++;

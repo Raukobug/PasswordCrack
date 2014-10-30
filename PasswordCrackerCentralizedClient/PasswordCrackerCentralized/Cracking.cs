@@ -14,6 +14,7 @@ namespace PasswordCrackerCentralized
         public readonly Queue<string> Lib = new Queue<string>();
         public Cracking()
         {
+            //Smider orderbogen i en kø så den er nem at tilgå.
             using (var fs = new FileStream("webster-dictionary.txt", FileMode.Open, FileAccess.Read))
             using (var dictionary = new StreamReader(fs))
             {
@@ -22,17 +23,11 @@ namespace PasswordCrackerCentralized
 
                     String dictionaryEntry = dictionary.ReadLine();
                     Lib.Enqueue(dictionaryEntry);
-                    //IEnumerable<UserInfoClearText> partialResult = CheckWordWithVariations(dictionaryEntry, userInfos);
-                    //result.AddRange(partialResult);
                 }
             }
-            //_messageDigest = new MD5CryptoServiceProvider();
-            // seems to be same speed
         }
 
-        /// <summary>
-        /// Runs the password cracking algorithm
-        /// </summary>
+        //Opretter tasks til hver connection.
         public void RunCracking(List<TcpClient> tcpClients)
         {
             var tasks = new List<Task>();
@@ -54,6 +49,7 @@ namespace PasswordCrackerCentralized
             var sr = new StreamReader(ns);
             List<UserInfo> userInfos = PasswordFileHandler.ReadPasswordFile("passwords.txt");
             var myResult = new List<string>();
+            //Sender bruger listen til serveren.
             foreach (var ui in userInfos)
             {
                 sw.WriteLine(ui);
@@ -63,12 +59,13 @@ namespace PasswordCrackerCentralized
 
             bool rdy = true;
             int numb = 1000;
+            //Så længe at ordbogen ikke er tom skal den sende info afsted.
             while (Lib.Count > 0)
             {
                 var stop = new Stopwatch();
                 if (rdy)
                 {
-                    //Console.WriteLine(numb);
+                    //Angiver hvor mange ord den skal sende afsted afgangen.
                     for (int j = 0; j < numb; j++)
                     {
                         if (Lib.Count > 0)
@@ -83,11 +80,12 @@ namespace PasswordCrackerCentralized
                     sw.Flush();
                 }
                 string msg = sr.ReadLine();
+                //Hvis den får beskeden Done tilbage skal den se hvor lang tid det tog og der efter tilføje 100 ord eller fjerne 100 ord fra den næste sending.
+                //Dette gør intet for hastigheden men fordeler hvor mange gange der bliver sendt til de forskellige server.
                 if (msg == "Done")
                 {
                     rdy = true;
                     stop.Stop();
-                    //Console.WriteLine(stop.Elapsed);
                     if (stop.Elapsed.Seconds >= 1 && numb != 100)
                     {
                         numb = numb - 100;
@@ -97,6 +95,7 @@ namespace PasswordCrackerCentralized
                         numb = numb + 100;
                     }
                 }
+                //Hvis det ikke er Done den får tilbage skal den udskrive det da det i dette tilfælde vil være et password der er blevet cracket.
                 if (msg != "Done")
                 {
                     if (msg != null)
@@ -111,6 +110,7 @@ namespace PasswordCrackerCentralized
             }
             foreach (var userInfo in userInfos)
             {
+                //Udskriver liste over password der ikke blev fundet.
                 if (!myResult.Contains(userInfo.Username))
                 {
                     Console.WriteLine("Password for {0} was not found!", userInfo.Username);

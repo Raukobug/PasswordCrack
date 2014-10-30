@@ -16,9 +16,11 @@ namespace PasswordCrackerCentralized
             bool startup = true;
             Console.WriteLine("Type in ip and port: xxx.xxx.xxx.xxx:xxxx");
             Console.WriteLine("Type start when ready.");
+            //Så længe startup er true er det muligt at indtaste nye connections.
             while (startup)
             {
                 string call = Console.ReadLine();
+                //Når der bliver skrevet start i console skal den gå igang med at sende til server.
                 if (call == "start")
                 {
                     startup = false;
@@ -28,6 +30,7 @@ namespace PasswordCrackerCentralized
                 }
                 else
                 {
+                    //Det her var brugt til at lave quick connections til vores computer.
                     if (call == "1")
                     {
                         call = "10.154.1.207:65080";
@@ -44,6 +47,7 @@ namespace PasswordCrackerCentralized
                     {
                         call = "localhost:65080";
                     }
+                    //Her prøver den at lave forbindelse til den angivet server. Hvis dette ikke lykkes skal den fortælle det.
                     try
                     {
                         if (call != null)
@@ -61,6 +65,7 @@ namespace PasswordCrackerCentralized
 
                 }
             }
+            //Sætte hele processen i gang.
             Stopwatch stopwatch = Stopwatch.StartNew();
             var tasks = new List<Task>();
             var cracker = new Cracking();
